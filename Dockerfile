@@ -1,31 +1,26 @@
-FROM osrf/ros:noetic-desktop-full
+FROM osrf/ros:foxy-desktop
+LABEL org.opencontainers.image.authors="czechjakub@icloud.com"
 
-LABEL Maintainer="Jakub Czech <czechjakub@icloud.com>"
-LABEL Description="Turtlebot ROS2 Humble Image"
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
+RUN apt install -y \
+    libasio-dev git python3-pip \
+    ros-foxy-cv-bridge ros-foxy-camera-calibration-parsers ros-foxy-gazebo-ros-pkgs
 
-ENV DEBIAN_FRONTEND=noninteractive
-ENV ROS_DISTRO=noetic
-ENV TURTLEBOT3_MODEL=burger
+RUN pip3 install transformations opencv-python opencv-contrib-python scipy
 
-RUN ./ros_entrypoint.sh
-RUN apt-get update
-RUN apt-get install -y apt-utils \
-    ros-$ROS_DISTRO-turtlebot3 \
-    ros-$ROS_DISTRO-turtlebot3-msgs \
-    ros-$ROS_DISTRO-turtlebot3-gazebo \
-    ros-${ROS_DISTRO}-rqt-* ros-${ROS_DISTRO}-joy ros-${ROS_DISTRO}-teleop-twist-joy \
-    ros-${ROS_DISTRO}-teleop-twist-keyboard ros-${ROS_DISTRO}-laser-proc ros-${ROS_DISTRO}-rgbd-launch \
-    ros-${ROS_DISTRO}-depthimage-to-laserscan ros-${ROS_DISTRO}-rosserial-arduino \
-    ros-${ROS_DISTRO}-rosserial-python ros-${ROS_DISTRO}-rosserial-server ros-${ROS_DISTRO}-rosserial-client \
-    ros-${ROS_DISTRO}-rosserial-msgs ros-${ROS_DISTRO}-amcl ros-${ROS_DISTRO}-map-server ros-${ROS_DISTRO}-move-base \
-    ros-${ROS_DISTRO}-urdf ros-${ROS_DISTRO}-xacro ros-${ROS_DISTRO}-compressed-image-transport ros-${ROS_DISTRO}-rqt-image-view \
-    ros-${ROS_DISTRO}-gmapping ros-${ROS_DISTRO}-navigation ros-${ROS_DISTRO}-interactive-markers ros-${ROS_DISTRO}-dwa-local-planner \
-    ros-${ROS_DISTRO}-multirobot-map-merge ros-${ROS_DISTRO}-explore-lite \
-    terminator
-RUN apt-get autoclean -y
-RUN apt-get autoremove -y 
-RUN apt-get clean
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
+RUN mkdir -p /root/tello_ws/src
+WORKDIR /root/tello_ws/src
+RUN git clone https://github.com/clydemcqueen/tello_ros.git
+RUN git clone https://github.com/ptrmu/ros2_shared.git
+RUN git clone https://github.com/JMU-ROBOTICS-VIVA/ros2_aruco.git
 
-WORKDIR /root/workspace
-VOLUME /dev/shm /dev/shm
+WORKDIR /root/tello_ws
+# Build all
+RUN . /opt/ros/foxy/setup.sh && \
+    colcon build --symlink-install
+# Add start script
+ADD ./src_files/start.sh .
+ADD ./src_files/.bash_history /root/.bash_history
+RUN echo "source /opt/ros/foxy/setup.sh" >> ~/.bashrc
+RUN echo "source /root/tello_ws/install/setup.bash" >> ~/.bashrc
+
