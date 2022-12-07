@@ -1,5 +1,4 @@
 #!/bin/bash
-docker build -t tb3:humble .
 xhost +
 docker run -it --name=$1 \
 --ulimit memlock=-1 \
