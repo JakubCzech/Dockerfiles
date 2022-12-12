@@ -1,20 +1,18 @@
-FROM osrf/ros:humble-simulation-jammy
+FROM ros:humble-ros-core-jammy
 
 LABEL Maintainer="Jakub Czech <czechjakub@icloud.com>"
-LABEL Description="Turtlebot ROS2 Humble Image"
+LABEL Description="Navigation for ROS2 Humble"
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV ROS_DISTRO=humble
-ENV TURTLEBOT3_MODEL=burger
 ENV ROS_DOMAIN_ID=33
 
 RUN ./ros_entrypoint.sh
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 RUN apt-get install -y apt-utils \
-    ros-$ROS_DISTRO-turtlebot3 \
-    ros-$ROS_DISTRO-turtlebot3-gazebo
-RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
+    ros-$ROS_DISTRO-navigation2 \
+    ros-$ROS_DISTRO-nav2-bringup
 
-WORKDIR /root/workspace
+RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 VOLUME /dev/shm /dev/shm
-VOLUME ./src:/root/workspace/
+RUN mkdir -p /root/workspace/src
+WORKDIR /root/workspace
