@@ -1,2 +1,2 @@
 #!/bin/bash
-docker build -t tb3:humble .
+docker build -t tb3:dashing_ml .
