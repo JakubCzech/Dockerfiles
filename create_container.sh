@@ -6,4 +6,4 @@ docker run -it --name=$1 \
 -v /home/$SUDO_USER/Shared:/root/Shared:rw \
 --device=/dev/dri:/dev/dri --device=/dev/video0 \
 --env="DISPLAY=$DISPLAY" --network=host \
-tb3:dashing_ml bash
+tb3:dashing-ml bash
